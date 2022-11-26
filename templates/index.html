@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CRM-Web</title>
+</head>
+
+<style>
+    #wrapper {
+        text-align: center;
+    }
+
+</style>
+
+<body>
+    <h1 id="wrapper">牛の価格予測</h1>
+
+    <!-- フォームの作成 -->
+    <form action="/cow_much" method="post" id="wrapper">
+        性別を入力してください: <input type="text" name="sex" required><br>
+        父牛を入力してください: <input type="text" name="father" required><br>
+        母の父を入力してください: <input type="text" name="gland" required><br>
+        母の祖父を入力してください: <input type="text" name="gege" required><br>
+        母の祖祖父を入力してください: <input type="text" name="got" required><br>
+        日令を入力してください: <input type="number" name="age" required><br>
+        体重を入力してください: <input type="number" name="wight" required><br>
+        <input type="submit" value="予測">
+    </form>
+</body>
+
+</html>
