@@ -1,25 +1,22 @@
 from flask import Flask, render_template, request
 import pandas as pd
-import joblib
-import warnings
+import pickle
 import xgboost as xgb
+import numpy as np
+
+
+# def price_predict(df):
+#     df_dummied = pd.get_dummies(df)
+#     with open("cow.pk",mode="rb")as fp:
+#         model=pickle.load(fp)
+#     e = df_dummied.tail(1)
+#     a = e.drop(columns = ['価格'])
+#     d = model.predict(xgb.DMatrix(a))
+#     df = df[:-1]
+#     return int(d),df
+
 
 app = Flask(__name__)
-
-
-def price_predict(df):
-    column = df.columns[5:9]
-
-    for col in column:
-        df[col] = df[col].astype('int')
-
-    df_dummied = pd.get_dummies(df)
-    model = joblib.load("./cow.pkl")
-    e = df_dummied.tail(1)
-    a = e.drop(columns = ['価格'])
-    a = xgb.DMatrix(a)
-    d = model.predict(a)
-    return int(d)
 
 
 @app.route("/")
@@ -29,6 +26,11 @@ def index():
 
 @app.route("/cow_much", methods=["POST"])
 def cow_much():
+    df = pd.read_csv("cow_data.csv")
+    columns = df.columns[1:9]
+    df = df.iloc[0 : len(df), [1, 2, 3, 4, 5, 6, 7, 8]]
+    df.columns = columns
+
     sex = request.form["sex"]
     father = request.form["father"]
     gland = request.form["gland"]
@@ -37,21 +39,30 @@ def cow_much():
     age = request.form["age"]
     wight = request.form["wight"]
 
-    df = pd.DataFrame(
+    df = df.append(
         {
-            "性別": [sex],
-            "父牛": [father],
-            "母の父": [gland],
-            "母の祖父": [gege],
-            "母の祖祖父": [got],
-            "日令": [age],
-            "体重": [wight],
-            "価格":1,
-        }
+            "性別": sex,
+            "父牛": father,
+            "母の父": gland,
+            "母の祖父": gege,
+            "母の祖祖父": got,
+            "日令": age,
+            "体重": wight,
+            "価格": 1,
+        },
+        ignore_index=True,
     )
 
-    result = price_predict(df)
+    df_dummied = pd.get_dummies(df)
+    with open("cow.pk", mode="rb") as fp:
+        model = pickle.load(fp)
+    e = df_dummied.tail(1)
+    a = e.drop(columns=["価格"])
+    d = model.predict(xgb.DMatrix(a))
+    df = df[:-1]
+    result = int(d)
     return render_template("result.html", result=result)
+
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
