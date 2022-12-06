@@ -46,16 +46,17 @@ def cow_much():
             "母の父": gland,
             "母の祖父": gege,
             "母の祖祖父": got,
-            "日令": age,
-            "体重": wight,
+            "日令": int(age),
+            "体重": int(wight),
             "価格": 1,
         },
         ignore_index=True,
     )
 
-    df_dummied = pd.get_dummies(df)
+    df_dummied = pd.get_dummies(df, drop_first=True)
     with open("cow.pk", mode="rb") as fp:
         model = pickle.load(fp)
+    cols_when_model_builds = model.get_booster().feature_names
     e = df_dummied.tail(1)
     a = e.drop(columns=["価格"])
     d = model.predict(xgb.DMatrix(a))
