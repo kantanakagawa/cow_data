@@ -2,19 +2,6 @@ from flask import Flask, render_template, request
 import pandas as pd
 import pickle
 import xgboost as xgb
-import numpy as np
-
-
-# def price_predict(df):
-#     df_dummied = pd.get_dummies(df)
-#     with open("cow.pk",mode="rb")as fp:
-#         model=pickle.load(fp)
-#     e = df_dummied.tail(1)
-#     a = e.drop(columns = ['価格'])
-#     d = model.predict(xgb.DMatrix(a))
-#     df = df[:-1]
-#     return int(d),df
-
 
 app = Flask(__name__)
 
@@ -36,31 +23,29 @@ def cow_much():
     gland = request.form["gland"]
     gege = request.form["gege"]
     got = request.form["got"]
-    age = request.form["age"]
-    wight = request.form["wight"]
 
-    df = df.append(
-        {
-            "性別": sex,
-            "父牛": father,
-            "母の父": gland,
-            "母の祖父": gege,
-            "母の祖祖父": got,
-            "日令": int(age),
-            "体重": int(wight),
-            "価格": 1,
-        },
-        ignore_index=True,
-    )
-
-    df_dummied = pd.get_dummies(df, drop_first=True)
     with open("cow.pk", mode="rb") as fp:
         model = pickle.load(fp)
-    cols_when_model_builds = model.get_booster().feature_names
+
+    f_names = model.feature_names
+    test_df = pd.DataFrame(index=[1], columns=f_names)
+    test_df = test_df.fillna(0)
+
+    sex = request.form["sex"]
+    father = request.form["father"]
+    gland = request.form["gland"]
+    gege = request.form["gege"]
+    got = request.form["got"]
+
+    test_df[f"性別_{sex}"] = 1
+    test_df[f"父牛_{father}"] = 1
+    test_df[f"母の父_{gland}"] = 1
+    test_df[f"母の祖父_{gege}"] = 1
+    test_df[f"母の祖祖父_{got}"] = 1
+
+    df_dummied = pd.get_dummies(test_df)
     e = df_dummied.tail(1)
-    a = e.drop(columns=["価格"])
-    d = model.predict(xgb.DMatrix(a))
-    df = df[:-1]
+    d = model.predict(xgb.DMatrix(e))
     result = int(d)
     return render_template("result.html", result=result)
 
