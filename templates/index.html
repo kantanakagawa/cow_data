@@ -1,30 +1,62 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "layout.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>CRM-Web</title>
-</head>
+{% block content %}
+<div class="row">
+    <div class="col-4 offset-4 text-center">
+        <h1 id="wrapper">牛の価格予測</h1>
 
-<style>
-    #wrapper {
-        text-align: center;
-    }
-
-</style>
-
-<body>
-    <h1 id="wrapper">牛の価格予測</h1>
-
-    <!-- フォームの作成 -->
-    <form action="/cow_much" method="post" id="wrapper">
-        性別を入力してください: <input type="text" name="sex" required><br>
-        父牛を入力してください: <input type="text" name="father" required><br>
-        母の父を入力してください: <input type="text" name="gland" required><br>
-        母の祖父を入力してください: <input type="text" name="gege" required><br>
-        母の祖祖父を入力してください: <input type="text" name="got" required><br>
-        <input type="submit" value="予測">
-    </form>
-</body>
-
-</html>
+        <!-- フォームの作成 -->
+        <form action="/cow_much" method="post">
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">性別</label>
+                <select class="form-select" id="inputGroupSelect01" name="sex">
+                    <option selected required>{{ sex }}</option>
+                    {% for sex in f_names if "性別" in sex %}
+                    <option required>{{ sex[3:] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">1代祖</label>
+                <select class="form-select" id="inputGroupSelect01" name="father">
+                    <option selected required>{{ father }}</option>
+                    {% for father in f_names if "父牛" in father %}
+                    <option required>{{ father[3:] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">2代祖</label>
+                <select class="form-select" id="inputGroupSelect01" name="grand">
+                    <option selected required>{{ grand }}</option>
+                    {% for grand in f_names if "母の父" in grand %}
+                    <option required>{{ grand[4:] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">3代祖</label>
+                <select class="form-select" id="inputGroupSelect01" name="great">
+                    <option selected required>{{ great }}</option>
+                    {% for great in f_names if "母の祖父" in great %}
+                    <option required>{{ great[5:] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">4代祖</label>
+                <select class="form-select" id="inputGroupSelect01" name="got">
+                    <option selected required>{{ got }}</option>
+                    {% for got in f_names if "母の祖祖父" in got %}
+                    <option required>{{ got[6:] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <input type="submit" value="予測">
+            </div>
+        </form>
+        <h1>{{result}}</h1>
+    </div>
+</div>
+{% endblock %}

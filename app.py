@@ -8,22 +8,27 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    with open("cow.pk", mode="rb") as fp:
+        model = pickle.load(fp)
+    f_names = model.feature_names
+    sex = "性別を選択してください"
+    father = "1代祖を選択してください"
+    grand = "2代祖を選択してください"
+    great = "3代祖を選択してください"
+    got = "4代祖を選択してください"
+    return render_template(
+        "index.html",
+        f_names=f_names,
+        sex=sex,
+        father=father,
+        grand=grand,
+        great=great,
+        got=got,
+    )
 
 
 @app.route("/cow_much", methods=["POST"])
 def cow_much():
-    df = pd.read_csv("cow_data.csv")
-    columns = df.columns[1:9]
-    df = df.iloc[0 : len(df), [1, 2, 3, 4, 5, 6, 7, 8]]
-    df.columns = columns
-
-    sex = request.form["sex"]
-    father = request.form["father"]
-    gland = request.form["gland"]
-    gege = request.form["gege"]
-    got = request.form["got"]
-
     with open("cow.pk", mode="rb") as fp:
         model = pickle.load(fp)
 
@@ -31,23 +36,32 @@ def cow_much():
     test_df = pd.DataFrame(index=[1], columns=f_names)
     test_df = test_df.fillna(0)
 
-    sex = request.form["sex"]
-    father = request.form["father"]
-    gland = request.form["gland"]
-    gege = request.form["gege"]
-    got = request.form["got"]
+    sex = request.form.get("sex")
+    father = request.form.get("father")
+    grand = request.form.get("grand")
+    great = request.form.get("great")
+    got = request.form.get("got")
 
     test_df[f"性別_{sex}"] = 1
     test_df[f"父牛_{father}"] = 1
-    test_df[f"母の父_{gland}"] = 1
-    test_df[f"母の祖父_{gege}"] = 1
+    test_df[f"母の父_{grand}"] = 1
+    test_df[f"母の祖父_{great}"] = 1
     test_df[f"母の祖祖父_{got}"] = 1
 
     df_dummied = pd.get_dummies(test_df)
     e = df_dummied.tail(1)
     d = model.predict(xgb.DMatrix(e))
-    result = int(d)
-    return render_template("result.html", result=result)
+    result = f"{int(d)}円"
+    return render_template(
+        "index.html",
+        result=result,
+        f_names=f_names,
+        sex=sex,
+        father=father,
+        grand=grand,
+        great=great,
+        got=got,
+    )
 
 
 if __name__ == "__main__":
